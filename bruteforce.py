@@ -14,25 +14,25 @@ max_p = 115792089237316195423570985008687907852837564279074904382605163141518161
 # random bruteforce
 # Will randomly generate addresses
 def RBF(r, sep_p):
-    print(f'Instance: {r + 1} - Generating random addresses...')
+    print('Instance: {} - Generating random addresses...'.format(r + 1))
     while True:
         pk = Key()
         if pk.address in wallets:
-            print(f'Instance: {r + 1} - Found: {pk.address}')
+            print('Instance: {} - Found: {}'.format(r + 1, pk.address))
             with open('found.txt', 'a') as result:
-                result.write(f'{pk.to_wif()}')
+                result.write('{}'.format(pk.to_wif()))
 
 
 # random bruteforce output
 def debug_RBF(r, sep_p):
-    print(f'Instance: {r + 1} - Generating random addresses...')
+    print('Instance: {} - Generating random addresses...'.format(r + 1))
     while True:
         pk = Key()
-        print(f'Instance: {r + 1} - Generated: {pk.address}')
+        print('Instance: {} - Generated: {}'.format(r + 1, pk.address))
         if pk.address in wallets:
-            print(f'Instance: {r + 1} - Found: {pk.address}')
+            print('Instance: {} - Found: {}'.format(r + 1, pk.address))
             with open('found.txt', 'a') as result:
-                result.write(f'{pk.to_wif()}')
+                result.write('{pk.to_wif()}')
 
 
 # traditional bruteforce (slowest)
@@ -40,15 +40,15 @@ def debug_RBF(r, sep_p):
 def TBF(r, sep_p):
     sint = sep_p * r if sep_p * r != 0 else 1
     mint = sep_p * (r + 1)
-    print(f'Instance: {r + 1} - Generating addresses...')
+    print('Instance: {} - Generating addresses...'.format(r + 1))
     while sint < mint:
         pk = Key.from_int(sint)
         if pk.address in wallets:
-            print(f'Instance: {r + 1} - Found: {pk.address}')
+            print('Instance: {} - Found: {}'.format(r + 1, pk.address))
             with open('found.txt', 'a') as result:
-                result.write(f'{pk.to_wif()}\n')
+                result.write('{pk.to_wif()}\n')
         sint += 1
-    print(f'Instance: {r + 1}  - Done')
+    print('Instance: {}  - Done'.format(r + 1))
 
 
 # online bruteforce (randomized)
@@ -57,20 +57,20 @@ def OBF():
     while True:
         pk = Key()
 
-        print(f'Instance: 1 - Generated: {pk.address} wif: {pk.to_wif()}')
+        print('Instance: 1 - Generated: {} wif: {}'.format(pk.address, pk.to_wif()))
         print('Instance: 1 - Checking balance...')
 
         try:
-            balance = int(get(f'https://blockchain.info/q/addressbalance/{pk.address}/').text)
+            balance = int(get('https://blockchain.info/q/addressbalance/{}/').text.format(pk.address))
         except ValueError:
-            print(f'Instance: 1 - Error reading balance from: {pk.address}')
+            print('Instance: 1 - Error reading balance from: {}'.format(pk.address))
             continue
 
-        print(f'Instance: 1 - {pk.address} has balance: {balance}')
+        print('Instance: 1 - {} has balance: {}'.format(pk.address, balance))
         if balance > 0:
             with open('found.txt', 'a') as result:
-                result.write(f'{pk.to_wif()}')
-            print(f'Instance: 1 - Added address to found.txt')
+                result.write('{pk.to_wif()}')
+            print('Instance: 1 - Added address to found.txt')
         print('Sleeping for 10 seconds...')
         sleep(10)
 
@@ -79,16 +79,16 @@ def OBF():
 def debug_TBF(r, sep_p):
     sint = sep_p * r if sep_p * r != 0 else 1
     mint = sep_p * (r + 1)
-    print(f'Instance: {r + 1} - Generating addresses...')
+    print('Instance: {} - Generating addresses...'.format(r + 1))
     while sint < mint:
         pk = Key.from_int(sint)
-        print(f'Instance: {r + 1} - Generated: {pk.address}')
+        print('Instance: {} - Generated: {}'.format(r + 1, pk.address))
         if pk.address in wallets:
-            print(f'Instance: {r + 1} - Found: {pk.address}')
+            print('Instance: {} - Found: {}'.format(r + 1, pk.address))
             with open('found.txt', 'a') as result:
-                result.write(f'{pk.to_wif()}\n')
+                result.write('{pk.to_wif()}\n')
         sint += 1
-    print(f'Instance: {r + 1}  - Done')
+    print('Instance: {}  - Done'.format(r + 1))
 
 
 # optimized traditional bruteforce
@@ -97,31 +97,31 @@ def debug_TBF(r, sep_p):
 def OTBF(r, sep_p):
     sint = (sep_p * r) + 10 ** 75 if r == 0 else (sep_p * r)
     mint = (sep_p * (r + 1))
-    print(f'Instance: {r + 1} - Generating addresses...')
+    print('Instance: {} - Generating addresses...'.format(r + 1))
     while sint < mint:
         pk = Key.from_int(sint)
         if pk.address in wallets:
-            print(f'Instance: {r + 1} - Found: {pk.address}')
+            print('Instance: {} - Found: {}'.format(r + 1, pk.address))
             with open('found.txt', 'a') as result:
-                result.write(f'{pk.to_wif()}\n')
+                result.write('{pk.to_wif()}\n')
         sint += 1
-    print(f'Instance: {r + 1}  - Done')
+    print('Instance: {}  - Done'.format(r + 1))
 
 
 # optimized traditional bruteforce ouput
 def debug_OTBF(r, sep_p):
     sint = (sep_p * r) + 10 ** 75 if r == 0 else (sep_p * r)
     mint = (sep_p * (r + 1))
-    print(f'Instance: {r + 1} - Generating addresses...')
+    print('Instance: {} - Generating addresses...'.format(r + 1))
     while sint < mint:
         pk = Key.from_int(sint)
-        print(f'Instance: {r + 1} - Generated: {pk.address}')
+        print('Instance: {} - Generated: {}'.format(r + 1, pk.address))
         if pk.address in wallets:
-            print(f'Instance: {r + 1} - Found: {pk.address}')
+            print('Instance: {} - Found: {}'.format(r + 1, pk.address))
             with open('found.txt', 'a') as result:
-                result.write(f'{pk.to_wif()}\n')
+                result.write('{pk.to_wif()}\n')
         sint += 1
-    print(f'Instance: {r + 1}  - Done')
+    print('Instance: {}  - Done'.format(r + 1))
 
 
 def main():
@@ -133,11 +133,11 @@ def main():
     for count, function in enumerate(mode):
         try:
             if 'debug' in function.__name__:
-                menu_string += f'{count} - {function.__name__} (Prints output)\n'
+                menu_string += '{} - {} (Prints output)\n'.format(count, function.__name__)
             else:
-                menu_string += f'{count} - {function.__name__}\n'
+                menu_string += '{} - {}\n'.format(count, function.__name__)
         except AttributeError:
-            menu_string += f'{count} - Exit\n'
+            menu_string += '{} - Exit\n'.format(count)
     print(menu_string)
 
     try:
@@ -146,7 +146,7 @@ def main():
             option = 4
             cpu_cores = 1
         elif choice != 0:
-            print(f'How many cores do you want to use ({cpu_count()} available)')
+            print('How many cores do you want to use ({} available)'.format(cpu_count()))
             cpu_cores = int(input('> '))
             cpu_cores = cpu_cores if 0 < cpu_cores < cpu_count() else cpu_count()
             option = choice if 0 < choice <= len(mode) - 1 else 0
@@ -158,7 +158,7 @@ def main():
         cpu_cores = 0
 
     if mode[option] and mode[option].__name__ != 'OBF':
-        print(f'Starting bruteforce instances in mode: {mode[option].__name__} with {cpu_cores} core(s)\n')
+        print('Starting bruteforce instances in mode: {} with {} core(s)\n'.format(mode[option].__name__, cpu_cores))
 
         instances = []
         for i in range(cpu_cores):
@@ -170,7 +170,8 @@ def main():
             instance.join()
 
     elif mode[option].__name__ == 'OBF':
-        print(f'Starting bruteforce in mode: {mode[option].__name__} (6 per minute to respect API rate limit)\n')
+        print('Starting bruteforce in mode: {} (6 per minute to '
+              'respect API rate limit)\n'.format(mode[option].__name__))
         OBF()
 
     print('Stopping...')
