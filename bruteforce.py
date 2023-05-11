@@ -11,6 +11,12 @@ with open('wallets.txt', 'r') as file:
 max_p = 115792089237316195423570985008687907852837564279074904382605163141518161494336
 
 
+def writeFoundDatas(filename, wif, address):
+    with open(filename, 'a') as result:
+        resultToWrite = "Address: {} PKwif: {}\n".format(address, wif)
+        result.write(resultToWrite)
+
+
 # random bruteforce
 # Will randomly generate addresses
 def RBF(r, sep_p):
@@ -19,8 +25,7 @@ def RBF(r, sep_p):
         pk = Key()
         if pk.address in wallets:
             print('Instance: {} - Found: {}'.format(r + 1, pk.address))
-            with open('found.txt', 'a') as result:
-                result.write('{}'.format(pk.to_wif()))
+            writeFoundDatas("found_RBF.txt", pk.to_wif(), pk.address)
 
 
 # random bruteforce output
@@ -31,8 +36,7 @@ def debug_RBF(r, sep_p):
         print('Instance: {} - Generated: {}'.format(r + 1, pk.address))
         if pk.address in wallets:
             print('Instance: {} - Found: {}'.format(r + 1, pk.address))
-            with open('found.txt', 'a') as result:
-                result.write('{pk.to_wif()}')
+            writeFoundDatas("found_dRB.txt", pk.to_wif(), pk.address)
 
 
 # traditional bruteforce (slowest)
@@ -45,8 +49,7 @@ def TBF(r, sep_p):
         pk = Key.from_int(sint)
         if pk.address in wallets:
             print('Instance: {} - Found: {}'.format(r + 1, pk.address))
-            with open('found.txt', 'a') as result:
-                result.write('{pk.to_wif()}\n')
+            writeFoundDatas("found_TBF.txt", pk.to_wif(), pk.address)
         sint += 1
     print('Instance: {}  - Done'.format(r + 1))
 
@@ -61,16 +64,20 @@ def OBF():
         print('Instance: 1 - Checking balance...')
 
         try:
-            balance = int(get('https://blockchain.info/q/addressbalance/{}/').text.format(pk.address))
+            getThisAddress = "https://blockchain.info/q/addressbalance/{}/".format(pk.address)
+            balance = int(get(getThisAddress).text)
         except ValueError:
             print('Instance: 1 - Error reading balance from: {}'.format(pk.address))
             continue
 
         print('Instance: 1 - {} has balance: {}'.format(pk.address, balance))
         if balance > 0:
-            with open('found.txt', 'a') as result:
-                result.write('{pk.to_wif()}')
+            writeFoundDatas("found_OBF.txt", pk.to_wif(), pk.address)
             print('Instance: 1 - Added address to found.txt')
+        else:
+            writeFoundDatas("not_found_OBF.txt", pk.to_wif(), pk.address)
+            print('Instance: 1 - Added address to notfound.txt')
+
         print('Sleeping for 10 seconds...')
         sleep(10)
 
@@ -85,8 +92,7 @@ def debug_TBF(r, sep_p):
         print('Instance: {} - Generated: {}'.format(r + 1, pk.address))
         if pk.address in wallets:
             print('Instance: {} - Found: {}'.format(r + 1, pk.address))
-            with open('found.txt', 'a') as result:
-                result.write('{pk.to_wif()}\n')
+            writeFoundDatas("found_dTBF.txt", pk.to_wif(), pk.address)
         sint += 1
     print('Instance: {}  - Done'.format(r + 1))
 
@@ -102,8 +108,7 @@ def OTBF(r, sep_p):
         pk = Key.from_int(sint)
         if pk.address in wallets:
             print('Instance: {} - Found: {}'.format(r + 1, pk.address))
-            with open('found.txt', 'a') as result:
-                result.write('{pk.to_wif()}\n')
+            writeFoundDatas("found_OTBF.txt", pk.to_wif(), pk.address)
         sint += 1
     print('Instance: {}  - Done'.format(r + 1))
 
@@ -118,8 +123,7 @@ def debug_OTBF(r, sep_p):
         print('Instance: {} - Generated: {}'.format(r + 1, pk.address))
         if pk.address in wallets:
             print('Instance: {} - Found: {}'.format(r + 1, pk.address))
-            with open('found.txt', 'a') as result:
-                result.write('{pk.to_wif()}\n')
+            writeFoundDatas("found_dOTBF.txt", pk.to_wif(), pk.address)
         sint += 1
     print('Instance: {}  - Done'.format(r + 1))
 
