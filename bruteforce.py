@@ -1,5 +1,8 @@
+import urllib3
 from bit import Key
 from multiprocessing import cpu_count, Process
+import requests
+
 from requests import get
 from time import sleep
 
@@ -11,9 +14,9 @@ with open('wallets.txt', 'r') as file:
 max_p = 115792089237316195423570985008687907852837564279074904382605163141518161494336
 
 
-def writeFoundDatas(filename, wif, address):
+def writeFoundDatas(filename, wif, address, pk):
     with open(filename, 'a') as result:
-        resultToWrite = "Address: {} PKwif: {}\n".format(address, wif)
+        resultToWrite = "Address: {} PKwif: {} PK: {}\n".format(address, wif, pk)
         result.write(resultToWrite)
 
 
@@ -25,7 +28,7 @@ def RBF(r, sep_p):
         pk = Key()
         if pk.address in wallets:
             print('Instance: {} - Found: {}'.format(r + 1, pk.address))
-            writeFoundDatas("found_RBF.txt", pk.to_wif(), pk.address)
+            writeFoundDatas("found_RBF.txt", pk.to_wif(), pk.address, pk)
 
 
 # random bruteforce output
@@ -36,7 +39,7 @@ def debug_RBF(r, sep_p):
         print('Instance: {} - Generated: {}'.format(r + 1, pk.address))
         if pk.address in wallets:
             print('Instance: {} - Found: {}'.format(r + 1, pk.address))
-            writeFoundDatas("found_dRB.txt", pk.to_wif(), pk.address)
+            writeFoundDatas("found_dRB.txt", pk.to_wif(), pk.address, pk)
 
 
 # traditional bruteforce (slowest)
@@ -49,7 +52,7 @@ def TBF(r, sep_p):
         pk = Key.from_int(sint)
         if pk.address in wallets:
             print('Instance: {} - Found: {}'.format(r + 1, pk.address))
-            writeFoundDatas("found_TBF.txt", pk.to_wif(), pk.address)
+            writeFoundDatas("found_TBF.txt", pk.to_wif(), pk.address, pk)
         sint += 1
     print('Instance: {}  - Done'.format(r + 1))
 
@@ -69,13 +72,17 @@ def OBF():
         except ValueError:
             print('Instance: 1 - Error reading balance from: {}'.format(pk.address))
             continue
+        except (ConnectionError, urllib3.exceptions.ProtocolError, requests.exceptions.ConnectionError):
+            print('Instance: 1 - Error Connection sleep for 10 seconds and try forver')
+            sleep(10)
+            continue
 
         print('Instance: 1 - {} has balance: {}'.format(pk.address, balance))
         if balance > 0:
-            writeFoundDatas("found_OBF.txt", pk.to_wif(), pk.address)
+            writeFoundDatas("found_OBF.txt", pk.to_wif(), pk.address, pk)
             print('Instance: 1 - Added address to found.txt')
         else:
-            writeFoundDatas("not_found_OBF.txt", pk.to_wif(), pk.address)
+            writeFoundDatas("not_found_OBF.txt", pk.to_wif(), pk.address, pk)
             print('Instance: 1 - Added address to notfound.txt')
 
         print('Sleeping for 10 seconds...')
@@ -92,7 +99,7 @@ def debug_TBF(r, sep_p):
         print('Instance: {} - Generated: {}'.format(r + 1, pk.address))
         if pk.address in wallets:
             print('Instance: {} - Found: {}'.format(r + 1, pk.address))
-            writeFoundDatas("found_dTBF.txt", pk.to_wif(), pk.address)
+            writeFoundDatas("found_dTBF.txt", pk.to_wif(), pk.address, pk)
         sint += 1
     print('Instance: {}  - Done'.format(r + 1))
 
@@ -108,7 +115,7 @@ def OTBF(r, sep_p):
         pk = Key.from_int(sint)
         if pk.address in wallets:
             print('Instance: {} - Found: {}'.format(r + 1, pk.address))
-            writeFoundDatas("found_OTBF.txt", pk.to_wif(), pk.address)
+            writeFoundDatas("found_OTBF.txt", pk.to_wif(), pk.address, pk)
         sint += 1
     print('Instance: {}  - Done'.format(r + 1))
 
@@ -123,7 +130,7 @@ def debug_OTBF(r, sep_p):
         print('Instance: {} - Generated: {}'.format(r + 1, pk.address))
         if pk.address in wallets:
             print('Instance: {} - Found: {}'.format(r + 1, pk.address))
-            writeFoundDatas("found_dOTBF.txt", pk.to_wif(), pk.address)
+            writeFoundDatas("found_dOTBF.txt", pk.to_wif(), pk.address, pk)
         sint += 1
     print('Instance: {}  - Done'.format(r + 1))
 
