@@ -2,9 +2,15 @@ import urllib3
 from bit import Key
 from multiprocessing import cpu_count, Process
 import requests
+from bit.wallet import BaseKey
+from cryptos.main import privtopub, get_privkey_format
+from cryptos.main import generate_private_key, encode_privkey, privkey_to_pubkey
 
 from requests import get
 from time import sleep
+
+from lib.pybitcointools.cryptos import get_private_keys, from_xprv
+from lib.pybitcointools.cryptos.script_utils import get_coin
 
 with open('wallets.txt', 'r') as file:
     wallets = set(file.read().split('\n'))
@@ -57,6 +63,52 @@ def TBF(r, sep_p):
     print('Instance: {}  - Done'.format(r + 1))
 
 
+def pub_from_wif(pk):
+    wif = pk.to_wif()
+    privKey = Key(wif)
+
+    myprivKey = generate_private_key()
+    print('Instance: 1 - myprivKey: {}'.format(myprivKey))
+
+   # my_pk_private_keys = get_private_keys(privKey)
+   # print('Instance: 1 - privKey get_private_keys: {}'.format(my_pk_private_keys))
+
+    my_private_keys = get_private_keys(myprivKey)
+    print('Instance: 1 - get_private_keys: {}'.format(my_private_keys))
+
+    myprivKey2 = encode_privkey(myprivKey, get_privkey_format(len(str(myprivKey))))
+    print('Instance: 1 - myprivKey2: {}'.format(myprivKey2))
+
+    theCoin = get_coin('btc', False)
+    print('Instance: 1 - get_coin: {}'.format(theCoin))
+
+    my_xpub = privkey_to_pubkey(myprivKey)
+    print('Instance: 1 - privkey_to_pubkey: {}'.format(my_xpub))
+
+    bitcoinAddress = privKey.address
+    print('Instance: 1 - bitcoinAddress: {}'.format(bitcoinAddress))
+
+    segwit_address = privKey.segwit_address
+    print('Instance: 1 - segwit_address: {}'.format(segwit_address))
+
+    public_key = privKey.public_key
+    print('Instance: 1 - public_key: {}'.format(public_key))
+
+    public_point = privKey.public_point
+    print('Instance: 1 - public_point: {}'.format(public_point))
+
+    privkey_format = get_privkey_format(len(str(myprivKey)))
+    print('Instance: 1 - privkey_format: {}'.format(privkey_format))
+
+    print('Instance: 1 - pub_to_hex: {} wif: {}'.format(BaseKey.pub_to_hex(pk), wif))
+    print('Instance: 1 - Key: {} public_key: {}'.format(Key(str(wif)), privKey.public_key))
+
+    encoded_privkey = encode_privkey(myprivKey, 'decimal')
+    print('Instance: 1 - encoded_privkey: {}'.format(encoded_privkey))
+
+    return public_key
+
+
 # online bruteforce (randomized)
 def OBF():
     print('Instance: 1 - Generating random addresses...')
@@ -76,13 +128,19 @@ def OBF():
             print('Instance: 1 - Error Connection sleep for 10 seconds and try forver')
             sleep(10)
             continue
+        except (requests.exceptions.ReadTimeout, urllib3.exceptions.ProtocolError, requests.exceptions.ConnectionError):
+            print('Instance: 1 - Error ReadTimeout sleep for 10 seconds and try forver')
+            sleep(10)
+            continue
 
         print('Instance: 1 - {} has balance: {}'.format(pk.address, balance))
         if balance > 0:
-            writeFoundDatas("found_OBF.txt", pk.to_wif(), pk.address, pk)
+            writeFoundDatas("found_OBF.txt", pk.to_wif(), pk.address, pk.public_key)
             print('Instance: 1 - Added address to found.txt')
         else:
-            writeFoundDatas("not_found_OBF.txt", pk.to_wif(), pk.address, pk)
+            writeFoundDatas("not_found_OBF.txt", pk.to_wif(), pk.address, pk.public_key)
+
+            print('Instance: 1 - pub_from_wif {}'.format(pub_from_wif(pk)))
             print('Instance: 1 - Added address to notfound.txt')
 
         print('Sleeping for 10 seconds...')
@@ -189,4 +247,20 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except TimeoutError:
+        sleep(30)
+        main()
+    except requests.exceptions.ReadTimeout:
+        sleep(60)
+        main()
+    finally:
+        print("...")
+        # https://www.blockchain.com/explorer/assets/btc/xpub/
+        # http://blockchain.info/q/getblockcount
+        # http://blockchain.info/address/$bitcoin_address?format=json&limit=50&offset=0
+        # http://blockchain.info/latestblock
+        # http://blockchain.info/address/$hash_160?format=json
+        # https://www.blockchain.com/explorer/api/q
+        #
